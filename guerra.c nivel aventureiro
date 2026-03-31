@@ -1,1 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
+// Struct Territorio
+typedef struct {
+    char nome[30];
+    char cor[10];
+    int tropas;
+} Territorio;
+
+// Exibe o mapa atual
+void exibirMapa(Territorio *mapa, int total) {
+    printf("=============================================\n\n");
+    for (int i = 0; i < total; i++) {
+        printf("%d. %s (Exercito %s, Tropas: %d)\n",
+               i + 1, mapa[i].nome, mapa[i].cor, mapa[i].tropas);
+    }
+    printf("\n");
+}
+
+// Função de ataque
+void atacar(Territorio *atacante, Territorio *defensor) {
+    int dadoAtacante = rand() % 6 + 1;
+    int dadoDefensor = rand() % 6 + 1;
+
+    printf("\n--- RESULTADO DA BATALHA ---\n");
+    printf("O atacante %s rolou um dado e tirou: %d\n", atacante->nome, dadoAtacante);
+    printf("O defensor %s rolou um dado e tirou: %d\n", defensor->nome, dadoDefensor);
+
+    if (dadoAtacante > dadoDefensor) {
+        printf("VITORIA DO ATAQUE! O defensor perdeu 1 tropa.\n");
+        defensor->tropas--;
+
+        if (defensor->tropas <= 0) {
+            printf("CONQUISTA! O territorio %s foi dominado pelo Exercito %s!\n",
+                   defensor->nome, atacante->cor);
+
+            strcpy(defensor->cor, atacante->cor);
+            defensor->tropas = 1;
+        }
+    } else {
+        printf("DEFESA BEM-SUCEDIDA! O atacante perdeu 1 tropa.\n");
+        atacante->tropas--;
+    }
+}
+
+// Libera memória
+void liberarMemoria(Territorio *mapa) {
+    free(mapa);
+}
+
+int main() {
+    int total = 5;
+    int atacante, defensor;
+
+    srand(time(NULL));
+
+    // Alocação dinâmica
+    Territorio *mapa = (Territorio *)calloc(total, sizeof(Territorio));
+
+    // Dados iniciais (conforme print)
+    strcpy(mapa[0].nome, "America");
+    strcpy(mapa[0].cor, "Azul");
+    mapa[0].tropas = 1;
+
+    strcpy(mapa[1].nome, "Europa");
+    strcpy(mapa[1].cor, "Verde");
+    mapa[1].tropas = 2;
+
+    strcpy(mapa[2].nome, "Asia");
+    strcpy(mapa[2].cor, "Vermelho");
+    mapa[2].tropas = 4;
+
+    strcpy(mapa[3].nome, "Africa");
+    strcpy(mapa[3].cor, "Amarelo");
+    mapa[3].tropas = 2;
+
+    strcpy(mapa[4].nome, "Oceania");
+    strcpy(mapa[4].cor, "Branco");
+    mapa[4].tropas = 2;
+
+    // Exibe mapa
+    exibirMapa(mapa, total);
+
+    printf("--- FASE DE ATAQUE ---\n");
+    printf("Escolha o territorio atacante (1 a 5, ou 0 para sair): ");
+    scanf("%d", &atacante);
+
+    if (atacante == 0) {
+        liberarMemoria(mapa);
+        return 0;
+    }
+
+    printf("Escolha o territorio defensor (1 a 5): ");
+    scanf("%d", &defensor);
+
+    atacante--;
+    defensor--;
+
+    // Validações
+    if (atacante < 0 || atacante >= total ||
+        defensor < 0 || defensor >= total) {
+        printf("Escolha invalida!\n");
+    } 
+    else if (strcmp(mapa[atacante].cor, mapa[defensor].cor) == 0) {
+        printf("Nao e permitido atacar territorio da mesma cor!\n");
+    }
+    else if (mapa[atacante].tropas <= 1) {
+        printf("Territorio atacante nao possui tropas suficientes!\n");
+    }
+    else {
+        atacar(&mapa[atacante], &mapa[defensor]);
+    }
+
+    printf("\nPressione Enter para continuar para o proximo turno...");
+    getchar();
+    getchar();
+
+    liberarMemoria(mapa);
+    return 0;
+}
